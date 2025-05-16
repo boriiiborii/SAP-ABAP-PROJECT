@@ -1,0 +1,1932 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZC103FIR0004F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZC103FIR0004F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZC103FIR0004F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_alv_payables</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_alv .
+
+  IF go_con2 IS INITIAL.
+
+    CLEAR: gt_fcat1, gs_fcat1.
+    PERFORM set_header_fcat USING :     'X' 'STATUS'         ' '  ' ' ' ',
+                                        'X' 'GJAHR'          'ZC103FIT0001'   'C' ' ',
+                                        'X' 'BELNR'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'BKTXT'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'BP_ID'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'BP_NAME'          'ZC103FIT0001'   ' ' 'X',
+                                        ' ' 'BUDAT'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'BLDAT'           'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'AUGBL'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'AUGDT'          'ZC103FIT0001'   ' ' ' ',
+                                        ' ' 'WAERS'         'ZC103FIT0001'   'C' ' '.
+
+    CLEAR : gt_fcat2, gs_fcat2.
+    PERFORM set_item_fcat USING :     'X' 'STATUS'       ' '  ' ' ' ',          "##
+                                      'X' 'BELNR'        'ZC103FIT0002' ' ' ' ', "####
+                                      ' ' 'BSCHL'        'ZC103FIT0002' ' ' ' ', "## #
+                                      ' ' 'SHKZG'        'ZC103FIT0002' ' ' ' ', "### ###
+                                      ' ' 'HKONT'        'ZC103FIT0002' 'C' ' ', "####
+                                      ' ' 'GL_NAME'      'ZC103FIT0002' ' ' ' ',
+                                      ' ' 'SGTXT'        'ZC103FIT0002' ' ' ' ', "####
+                                      ' ' 'DMBTR'        'ZC103FIT0002' ' ' ' ',
+                                      ' ' 'K_WAERS'      'ZC103FIT0002' 'C' ' ',
+                                      ' ' 'WRBTR'        'ZC103FIT0002' ' ' ' ', "##
+                                      ' ' 'WAERS'        'ZC103FIT0002' 'C' ' ', "##
+                                      ' ' 'USNAME'       'ZC103FIT0002' ' ' ' ', "#####
+                                      ' ' 'AUGDT'        'ZC103FIT0002' ' ' ' '. "######
+
+    CLEAR : gt_fcat3, gs_fcat3.
+    PERFORM set_pay_deposit_fcat USING : ' ' 'BANK_DATE' 'ZC103FIT0020' ' ' ' ',
+                                         ' ' 'DMBTR'   'ZC103FIT0020' ' ' ' ',
+                                         ' ' 'K_WAERS' 'ZC103FIT0020' 'C' ' ',
+                                         ' ' 'WRBTR'    'ZC103FIT0020' ' ' ' ',
+                                         ' ' 'WAERS' 'ZC103FIT0020' 'C' ' ',
+                                         ' ' 'BANK_NAME' 'ZC103FIT0020' ' ' ' '.
+
+    PERFORM set_layout.
+    PERFORM create_obj.
+
+    SET HANDLER : lcl_event_handler=&gt;account_edit_toolbar   FOR go_right_btm_alv,
+                  lcl_event_handler=&gt;hotspot_click       FOR go_mid_alv,
+                  lcl_event_handler=&gt;user_command        FOR go_right_btm_alv.
+
+    CALL METHOD go_mid_alv-&gt;set_table_for_first_display
+      EXPORTING
+        is_variant      = gs_variant
+        i_save          = 'A'
+        i_default       = 'X'
+        is_layout       = gs_layout1
+      CHANGING
+        it_outtab       = gt_header
+        it_fieldcatalog = gt_fcat1.
+
+    CALL METHOD go_left_btm_alv-&gt;set_table_for_first_display
+      EXPORTING
+        is_variant      = gs_variant
+        i_save          = 'A'
+        i_default       = 'X'
+        is_layout       = gs_layout2
+      CHANGING
+        it_outtab       = gt_item
+        it_fieldcatalog = gt_fcat2.
+<font color ="#0000FF">*        it_sort         = gt_sort.</font>
+
+    CALL METHOD go_right_btm_alv-&gt;set_table_for_first_display
+      EXPORTING
+        is_variant      = gs_variant
+        i_save          = 'A'
+        i_default       = 'X'
+        is_layout       = gs_layout3
+      CHANGING
+        it_outtab       = gt_account
+        it_fieldcatalog = gt_fcat3.
+
+  ENDIF.
+
+ENDFORM.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_layout</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_layout .
+
+  gs_layout1-zebra       = 'X'.
+  gs_layout1-cwidth_opt  = 'A'.
+  gs_layout1-sel_mode    = 'D'.
+  gs_layout1-totals_bef = abap_true. " Total line : First display
+  gs_layout1-ctab_fname = 'COLOR'.
+
+  gs_layout2 = gs_layout1.
+  gs_layout3 = gs_layout1.
+  PERFORM layout_title.
+
+  gs_variant-report     = sy-repid.
+  gs_variant-handle     = 'ALV1'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_header_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_header_fcat  USING : pv_key pv_field pv_table pv_just pv_emph.
+
+  CLEAR: gs_fcat1.
+
+  gs_fcat1-key       = pv_key.
+  gs_fcat1-fieldname = pv_field.
+  gs_fcat1-ref_table = pv_table.
+  gs_fcat1-just      = pv_just.
+  gs_fcat1-emphasize = pv_emph.
+
+  CASE pv_field.
+    WHEN 'BELNR'.
+      gs_fcat1-coltext = '####'.
+      gs_fcat1-hotspot = abap_true.
+    WHEN 'GJAHR'.
+      gs_fcat1-coltext = '####'.
+    WHEN 'STATUS'.
+      gs_fcat1-coltext = '##'.
+      gs_fcat1-icon    = 'X'.
+    WHEN 'BKTXT'.
+      gs_fcat1-coltext = '######'.
+    WHEN 'BP_ID'.
+      gs_fcat1-coltext = 'BP##'.
+    WHEN 'BP_NAME'.
+      gs_fcat1-coltext = 'BP#'.
+    WHEN 'BUDAT'.
+      gs_fcat1-coltext = '###'.
+    WHEN 'BLDAT'.
+      gs_fcat1-coltext = '###'.
+    WHEN 'AUGDT'.
+      gs_fcat1-coltext = '####'.
+    WHEN 'AUGBL'.
+      gs_fcat1-coltext = '######'.
+    WHEN 'WAERS'.
+      gs_fcat1-coltext = '####'.
+  ENDCASE.
+
+
+  APPEND gs_fcat1 TO gt_fcat1.
+  CLEAR gs_fcat1.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_item_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_item_fcat  USING : pv_key pv_field pv_table pv_just pv_emph.
+
+  CLEAR: gs_fcat2.
+
+  gs_fcat2-key       = pv_key.
+  gs_fcat2-fieldname = pv_field.
+  gs_fcat2-ref_table = pv_table.
+  gs_fcat2-just      = pv_just.
+  gs_fcat2-emphasize = pv_emph.
+
+  CASE pv_field.
+    WHEN 'BELNR'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'GJAHR'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'BUZEI'.
+      gs_fcat2-coltext = '##'.
+    WHEN 'STATUS'.
+      gs_fcat2-coltext = '##'.
+      gs_fcat2-icon    = 'X'.
+    WHEN 'BLART'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'SGTXT'.
+      gs_fcat2-coltext = '#######'.
+    WHEN 'HKONT'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'GL_NAME'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'BSCHL'.
+      gs_fcat2-coltext = '## #'.
+    WHEN 'SHKZG'.
+      gs_fcat2-coltext = '######'.
+    WHEN 'SAKNR'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'WRBTR'.
+      gs_fcat2-do_sum     = abap_true.
+      gs_fcat2-coltext = '####'.
+      gs_fcat2-cfieldname = 'WAERS'.
+    WHEN 'DMBTR'.
+      gs_fcat2-do_sum     = abap_true.
+      gs_fcat2-coltext = '####'.
+      gs_fcat2-cfieldname = 'K_WAERS'.
+    WHEN 'USNAME'.
+      gs_fcat2-coltext = '#####'.
+    WHEN 'AUGDT'.
+      gs_fcat2-coltext = '####'.
+    WHEN 'K_WAERS'.
+      gs_fcat2-coltext = '#####'.
+    WHEN 'WAERS'.
+      gs_fcat2-coltext = '#####'.
+
+  ENDCASE.
+
+  APPEND gs_fcat2 TO gt_fcat2.
+  CLEAR gs_fcat2.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form create_obj</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_obj .
+
+  CREATE OBJECT go_con2
+    EXPORTING
+      container_name = 'MAIN_CONT'.
+
+<font color ="#0000FF">*-- ## ##(1)</font>
+  CREATE OBJECT go_split_top
+    EXPORTING
+      parent  = go_con2
+      rows    = 2
+      columns = 1.
+
+  CALL METHOD go_split_top-&gt;get_container
+    EXPORTING
+      row       = 1
+      column    = 1
+    RECEIVING
+      container = go_mid_cont.
+
+  CALL METHOD go_split_top-&gt;get_container
+    EXPORTING
+      row       = 2
+      column    = 1
+    RECEIVING
+      container = go_btm_cont.
+
+
+<font color ="#0000FF">*-- ## ##(2)</font>
+  CREATE OBJECT go_split_btm
+    EXPORTING
+      parent  = go_btm_cont
+      rows    = 1
+      columns = 2.
+
+  CALL METHOD go_split_btm-&gt;get_container
+    EXPORTING
+      row       = 1
+      column    = 1
+    RECEIVING
+      container = go_left_btm_cont.
+
+  CALL METHOD go_split_btm-&gt;get_container
+    EXPORTING
+      row       = 1
+      column    = 2
+    RECEIVING
+      container = go_right_btm_cont.
+
+
+<font color ="#0000FF">*-- Patch ALV</font>
+  CREATE OBJECT go_mid_alv
+    EXPORTING
+      i_parent = go_mid_cont.
+
+  CREATE OBJECT go_left_btm_alv
+    EXPORTING
+      i_parent = go_left_btm_cont.
+
+  CREATE OBJECT go_right_btm_alv
+    EXPORTING
+      i_parent = go_right_btm_cont.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_item_edit_toolbar</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_INTERACTIVE</font>
+<font color ="#0000FF">*&      --&gt; E_OBJECT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_account_edit_toolbar  USING    pv_interactive
+                                        po_object TYPE REF TO cl_alv_event_toolbar_set.
+
+  DATA : lv_disabled.
+
+  CLEAR : gs_button.
+  gs_button-butn_type = '3'.
+  APPEND gs_button TO po_object-&gt;mt_toolbar.
+
+  CLEAR : gs_button.
+  gs_button-function  = 'CLEARING'.
+  gs_button-icon      = icon_okay.
+  gs_button-quickinfo = '####'.
+  gs_button-text      = '##'.
+  APPEND gs_button TO po_object-&gt;mt_toolbar.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form refresh_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM refresh_data .
+
+  DATA : ls_stable  TYPE lvc_s_stbl.
+
+<font color ="#0000FF">*--- ## #### ## ##</font>
+  ls_stable-row = 'X'.
+  ls_stable-col = 'X'.
+
+  CALL METHOD go_mid_alv-&gt;refresh_table_display
+    EXPORTING
+      is_stable = ls_stable.
+
+  CALL METHOD go_left_btm_alv-&gt;refresh_table_display
+    EXPORTING
+      is_stable = ls_stable.
+
+  CALL METHOD go_right_btm_alv-&gt;refresh_table_display
+    EXPORTING
+      is_stable = ls_stable.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_docdetail</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_docdetail .
+
+  DATA: lt_rows   TYPE lvc_t_row,
+        lv_index  TYPE lvc_index,
+        gs_header LIKE gs_header,  " #### ##
+        lv_docno  TYPE i.
+
+  " ### # ####
+  CALL METHOD go_mid_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_rows.
+
+  READ TABLE lt_rows INTO DATA(ls_row) INDEX 1.
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE '### #####.' TYPE 'W'.
+    RETURN..
+  ENDIF.
+
+  " ### ## ## ### ####
+  READ TABLE gt_header INTO gs_header INDEX ls_row-index.
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE '### ### ####.' TYPE 'S' DISPLAY LIKE 'E'..
+    RETURN..
+  ENDIF.
+
+  lv_docno = gs_header-belnr.
+
+  " ## ##### #### #### SELECT
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE gt_item
+    FROM zc103fit0002
+    WHERE belnr = lv_docno.
+
+  " ## ALV ####
+  CALL METHOD go_btm_alv-&gt;refresh_table_display.
+
+
+ENDFORM.
+
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_hotspot_click</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_ROW_ID</font>
+<font color ="#0000FF">*&      --&gt; E_COLUMN_ID</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_hotspot_click  USING    pv_row_id
+                                    pv_column_id.
+
+  DATA: lv_gjahr TYPE zc103fit0001-gjahr,
+        lv_belnr TYPE zc103fit0001-belnr,
+        lv_bpid  TYPE zc103fit0001-bp_id.
+
+  CLEAR: lv_gjahr, lv_belnr, lv_bpid.
+
+  READ TABLE gt_header INTO gs_header INDEX pv_row_id.
+
+<font color ="#0000FF">*-- ### ### ### ##</font>
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE '### ### ####.' TYPE 'I'.
+    RETURN..
+  ENDIF.
+
+  lv_gjahr = gs_header-gjahr.
+  lv_belnr = gs_header-belnr.
+  lv_bpid  = gs_header-bp_id.
+  gv_belnr = gs_header-belnr.
+
+  IF gs_header-bstat = 'A'.
+    gv_status = 'N'.
+  ELSE.
+    gv_status = 'Y'.
+  ENDIF.
+
+<font color ="#0000FF">*-- ### ##### #### ### # ## ## ##</font>
+  PERFORM get_item_bank_data USING: lv_gjahr lv_belnr lv_bpid abap_false.
+  PERFORM refresh_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clearing_popup</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clearing_popup .
+
+  " ### # ####
+  DATA: lt_rows  TYPE lvc_t_row,
+        lv_index TYPE sy-tabix.
+
+  CALL METHOD go_left_btm_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_rows.
+
+  IF lt_rows IS INITIAL.
+    MESSAGE '## ## #####.' TYPE 'I'.
+    RETURN..
+  ENDIF.
+
+  READ TABLE lt_rows INTO DATA(ls_row) INDEX 1.
+  lv_index = ls_row-index.
+
+  READ TABLE gt_item INTO gs_item INDEX lv_index.
+
+  " ### ## ## ### ### ####
+  CALL SCREEN 110.  " # ## ### (modal dialog screen)
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form display_clearing_screen</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM display_clearing_screen .
+
+  IF go_pop_cont IS INITIAL.
+
+    PERFORM create_pop_obj.
+
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form create_pop_obj</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM create_pop_obj .
+
+  CREATE OBJECT go_pop_cont
+    EXPORTING
+      container_name = 'CLEARING_CONT'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form handle_user_command</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; E_UCOMM</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM handle_user_command  USING    pv_ucomm.
+
+  CASE pv_ucomm.
+    WHEN 'CLEARING'.
+      PERFORM clearing_docu_validation.
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_docu</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clearing_docu_validation .
+
+  DATA: lt_rows             TYPE lvc_t_row,
+        lt_selected_indices TYPE STANDARD TABLE OF sy-tabix,
+        lv_total_selection  TYPE i,
+        lv_index            TYPE sy-tabix,
+        lv_selected_bpid    TYPE zc103fit0001-bp_id,
+        lv_selected_belnr   TYPE zc103fit0001-belnr,
+        lv_selected_gjahr   TYPE zc103fit0001-gjahr,
+        lv_oldest_belnr     TYPE zc103fit0001-belnr,
+        lv_oldest_gjahr     TYPE zc103fit0001-gjahr,
+        lv_first_found      TYPE abap_bool VALUE abap_false,
+        lv_sum_dmbtr        TYPE dmbtr,
+        lv_target_amount    TYPE dmbtr,
+        lv_excess_dmbtr     TYPE wrbtr,
+        lv_answer,
+        lv_new_belnr        TYPE zc103fit0001-belnr,
+        lv_selected_waers   TYPE zc103fit0002-waers,
+        lv_subrc            TYPE sy-subrc,
+        lv_temp_dmbtr       TYPE zc103fit0002-wrbtr,
+        lv_selected_wrbtr   TYPE wrbtr.
+
+  IF                  gv_status = 'Y'.
+    MESSAGE TEXT-e01 TYPE 'I' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  " 1. ### # ####
+  CALL METHOD go_right_btm_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_rows.
+
+  IF lt_rows IS INITIAL.
+    MESSAGE TEXT-e02 TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  " 2. ### ### ##
+  LOOP AT lt_rows INTO DATA(ls_row).
+    APPEND ls_row-index TO lt_selected_indices.
+  ENDLOOP.
+
+  SORT lt_selected_indices.
+
+  " 3. ### ## (1### #### ######)
+  lv_total_selection = lines( lt_selected_indices ).
+
+  DO lv_total_selection TIMES.
+    lv_index = sy-index.
+
+    READ TABLE lt_selected_indices WITH TABLE KEY table_line = lv_index TRANSPORTING NO FIELDS.
+    IF sy-subrc &lt;&gt; 0.
+      MESSAGE TEXT-e03 TYPE 'S' DISPLAY LIKE 'E'.
+      RETURN.
+    ENDIF.
+  ENDDO.
+
+  " 4. ### BP_ID ####
+  READ TABLE gt_account INTO DATA(ls_selected_account) INDEX lt_selected_indices[ 1 ].
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE TEXT-e04 TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  lv_selected_bpid = ls_selected_account-bp_id.
+
+  " 5. # BP# ## ## ### ### BELNR ##
+  LOOP AT gt_header INTO DATA(gs_header)
+    WHERE bp_id = lv_selected_bpid
+      AND bstat = 'A'. " ####
+
+    IF lv_first_found = abap_false.
+      lv_oldest_gjahr = gs_header-gjahr.
+      lv_oldest_belnr = gs_header-belnr.
+      lv_oldest_gjahr = gs_header-gjahr.
+      lv_first_found = abap_true.
+    ELSE.
+      " ## GJAHR# ####, ### BELNR ##
+      IF gs_header-gjahr &lt; lv_oldest_gjahr OR
+         ( gs_header-gjahr = lv_oldest_gjahr AND gs_header-belnr &lt; lv_oldest_belnr ).
+        lv_oldest_gjahr = gs_header-gjahr.
+        lv_oldest_belnr = gs_header-belnr.
+      ENDIF.
+    ENDIF.
+  ENDLOOP.
+
+  " 6. ### ### BELNR ####
+  READ TABLE gt_item INTO DATA(ls_item) INDEX 1.
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE TEXT-e05 TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  IF ls_item-waers = 'USD' AND lines( lt_selected_indices ) &gt; 1.
+    MESSAGE 'USD# #######, ### ## ## #####' TYPE 'E'.
+    RETURN.
+  ENDIF.
+
+  lv_selected_belnr = ls_item-belnr. " BELNR ####
+  lv_selected_gjahr = ls_item-gjahr.
+  lv_selected_waers = ls_item-waers.
+  lv_selected_wrbtr = ls_item-wrbtr.
+
+  " 7. ## ### ##### ##
+  IF lv_selected_belnr &gt; lv_oldest_belnr. " BELNR ##
+    MESSAGE TEXT-e06 TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  " 8. ### #### vs #### ##
+  CLEAR: lv_sum_dmbtr, lv_target_amount, lv_subrc.
+
+  " 8-1. ### ## ## wrbtr ##
+  LOOP AT lt_selected_indices INTO lv_index.
+    READ TABLE gt_account INTO ls_selected_account INDEX lv_index.
+    IF sy-subrc = 0.
+      lv_sum_dmbtr = lv_sum_dmbtr + ls_selected_account-dmbtr.
+    ENDIF.
+  ENDLOOP.
+
+  " 8-2. #### = GT_ITEM ### WRBTR ##
+  CLEAR lv_target_amount.
+
+  LOOP AT gt_item INTO ls_item.
+    lv_target_amount = lv_target_amount + ls_item-dmbtr.
+  ENDLOOP.
+
+  READ TABLE gt_item INTO ls_item INDEX 1.
+
+  CASE ls_item-waers.
+    WHEN 'KRW'.
+
+      " 8-3. ##
+      IF lv_sum_dmbtr &gt; lv_target_amount.
+        MESSAGE TEXT-e07 TYPE 'S' DISPLAY LIKE 'E'.
+        lv_excess_dmbtr = lv_sum_dmbtr - lv_target_amount.
+      ELSE.
+        call function <a href ="zc1f030001/zc1f030001.html">'ZC1F030001'</a>
+          EXPORTING
+            iv_action = '####'
+          IMPORTING
+            ev_answer = lv_answer.
+
+        IF lv_answer = '2'.
+          RETURN.
+        ENDIF.
+
+        PERFORM clearing_docu_krw USING lv_selected_belnr lv_selected_gjahr lv_selected_bpid CHANGING lv_new_belnr lv_subrc.
+      ENDIF.
+
+    WHEN 'USD'.
+      "USD# ##### ## ### ### ##### #### ## ## ### ###.
+      call function <a href ="zc1f030001/zc1f030001.html">'ZC1F030001'</a>
+        EXPORTING
+          iv_action = '####'
+        IMPORTING
+          ev_answer = lv_answer.
+
+      IF lv_answer = '2'.
+        RETURN.
+
+      ENDIF.
+
+      PERFORM clearing_docu_usd USING lv_selected_belnr lv_selected_gjahr lv_selected_bpid
+                                      lv_sum_dmbtr lv_target_amount lv_selected_waers CHANGING lv_new_belnr lv_subrc.
+    WHEN OTHERS.
+  ENDCASE.
+
+  "## ### 0# ### ### ##
+  IF lv_subrc &lt;&gt; 4.
+    CLEAR lv_target_amount.
+
+    LOOP AT gt_item INTO ls_item.
+      lv_target_amount = lv_target_amount + ls_item-dmbtr.
+    ENDLOOP.
+
+    IF lv_target_amount = 0.
+      UPDATE zc103fit0001
+      SET bstat = 'B'
+          augbl = lv_new_belnr
+          augdt = sy-datum
+          aedat = sy-datum
+          aenam = sy-uname
+          aezet = sy-uzeit
+      WHERE belnr = lv_selected_belnr
+        AND gjahr = lv_selected_gjahr.
+      IF sy-subrc = 0.
+        COMMIT WORK.
+        .
+        IF sy-subrc &lt;&gt; 0.
+<font color ="#0000FF">* Implement suitable error handling here</font>
+        ENDIF.
+
+        PERFORM get_data USING : ''.
+        PERFORM set_header.
+        PERFORM get_item_bank_data USING: lv_selected_gjahr lv_selected_belnr lv_selected_bpid abap_false.
+        PERFORM refresh_data.
+        call function <a href ="zfmc103sd_change_status/zfmc103sd_change_status.html">'ZFMC103SD_CHANGE_STATUS'</a>
+          EXPORTING
+            iv_gjahr = lv_selected_gjahr
+            iv_belnr = lv_selected_belnr.
+<font color ="#0000FF">*-- ALV## ### ###### PBO# ##. ### ### ### ### ##</font>
+        CALL METHOD cl_gui_cfw=&gt;set_new_ok_code
+          EXPORTING
+            new_code = 'ENTER'.
+        MESSAGE TEXT-s01 TYPE 'I'.
+      ELSE.
+        ROLLBACK WORK.
+        MESSAGE '## ## ## ##' TYPE 'E'.
+      ENDIF.
+    ENDIF.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form text_editor</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM text_editor .
+
+  DATA: lv_result         TYPE string.
+
+  call function <a href ="zc103pmfg0003/zc103pmfg0003.html">'ZC103PMFG0003'</a>
+    IMPORTING
+      ev_text   = lv_result
+    EXCEPTIONS
+      cancelled = 1
+      OTHERS    = 2.
+
+  IF sy-subrc = 0.
+    WRITE: / '### ###:', lv_result.
+  ELSE.
+    WRITE: / '#### ######.'.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_pay_deposit_fcat</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_pay_deposit_fcat USING pv_key pv_field pv_table pv_just pv_emph.
+
+  CLEAR: gs_fcat3.
+
+  gs_fcat3-key       = pv_key.
+  gs_fcat3-fieldname = pv_field.
+  gs_fcat3-ref_table = pv_table.
+  gs_fcat3-just      = pv_just.
+  gs_fcat3-emphasize = pv_emph.
+
+  CASE pv_field.
+    WHEN 'BANK_DATE'.
+      gs_fcat3-coltext = '##'.
+    WHEN 'DMBTR'.
+      gs_fcat3-coltext = '####'.
+      gs_fcat3-cfieldname = 'K_WAERS'.
+    WHEN 'WRBTR'.
+      gs_fcat3-coltext = '####'.
+      gs_fcat3-cfieldname = 'WAERS'.
+    WHEN 'WAERS'.
+      gs_fcat3-coltext = '#####'.
+    WHEN 'BANKNAME'.
+      gs_fcat3-coltext = '#####'.
+    WHEN 'BANKDATE'.
+      gs_fcat3-coltext = '####'.
+    WHEN 'K_WAERS'.
+      gs_fcat3-coltext = '#####'.
+  ENDCASE.
+
+  APPEND gs_fcat3 TO gt_fcat3.
+  CLEAR gs_fcat3.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form add_row</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; LR_DD_TABLE</font>
+<font color ="#0000FF">*&      --&gt; COL_FIELD</font>
+<font color ="#0000FF">*&      --&gt; COL_VALUE</font>
+<font color ="#0000FF">*&      --&gt; P_</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM add_row  USING pr_dd_table  TYPE REF TO cl_dd_table_element
+                    pv_col_field TYPE REF TO cl_dd_area
+                    pv_col_value TYPE REF TO cl_dd_area
+                    pv_field
+                    pv_text.
+
+  DATA : lv_text TYPE sdydo_text_element.
+
+<font color ="#0000FF">*-- Field.</font>
+  lv_text = pv_field.
+
+  CALL METHOD pv_col_field-&gt;add_text
+    EXPORTING
+      text         = lv_text
+      sap_emphasis = cl_dd_document=&gt;strong
+      sap_color    = cl_dd_document=&gt;list_heading_inv.
+
+  CALL METHOD pv_col_field-&gt;add_gap
+    EXPORTING
+      width = 3.
+
+<font color ="#0000FF">*-- Value.</font>
+  lv_text = pv_text.
+
+  CALL METHOD pv_col_value-&gt;add_text
+    EXPORTING
+      text         = lv_text
+      sap_emphasis = cl_dd_document=&gt;heading
+      sap_color    = cl_dd_document=&gt;list_negative_inv.
+
+  CALL METHOD pv_col_value-&gt;add_gap
+    EXPORTING
+      width = 3.
+
+  CALL METHOD pr_dd_table-&gt;new_row.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_data USING : pv_bpid.
+
+  DATA : lv_cnt TYPE i.
+
+  CASE gv_check.
+    WHEN ' '.
+      CASE pv_bpid.
+        WHEN ''.
+          IF pa_pay = 'X'.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+                   stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+                   erdat erzet ernam aedat aezet aenam augbl augdt
+              INTO CORRESPONDING FIELDS OF TABLE gt_header
+              FROM zc103fit0001
+              WHERE blart = 'KR'
+              AND   budat IN so_budt
+              AND stblg = ''
+              ORDER BY gjahr belnr.
+          ELSE.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+               stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+               erdat erzet ernam aedat aezet aenam augbl augdt
+          INTO CORRESPONDING FIELDS OF TABLE gt_header
+          FROM zc103fit0001
+          WHERE blart = 'DR'
+          AND   budat IN so_budt
+          AND stblg = ''
+          ORDER BY gjahr belnr.
+          ENDIF.
+        WHEN OTHERS.
+          IF pa_pay = 'X'.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+                   stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+                   erdat erzet ernam aedat aezet aenam augbl augdt
+              INTO CORRESPONDING FIELDS OF TABLE gt_header
+              FROM zc103fit0001
+              WHERE blart = 'KR'
+              AND   budat IN so_budt
+              AND stblg = ''
+              AND bp_id = pv_bpid
+              ORDER BY gjahr belnr.
+          ELSE.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+               stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+               erdat erzet ernam aedat aezet aenam augbl augdt
+          INTO CORRESPONDING FIELDS OF TABLE gt_header
+          FROM zc103fit0001
+          WHERE blart = 'DR'
+          AND   budat IN so_budt
+          AND stblg = ''
+              AND bp_id = pv_bpid
+          ORDER BY gjahr belnr.
+          ENDIF.
+      ENDCASE.
+    WHEN 'X'.
+      CASE pv_bpid.
+        WHEN ''.
+          IF pa_pay = 'X'.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+                   stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+                   erdat erzet ernam aedat aezet aenam augbl augdt
+              INTO CORRESPONDING FIELDS OF TABLE gt_header
+              FROM zc103fit0001
+              WHERE blart = 'KR'
+              AND   budat IN so_budt
+              AND stblg = ''
+              AND bstat = 'A'
+            ORDER BY gjahr belnr.
+          ELSE.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+               stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+               erdat erzet ernam aedat aezet aenam augbl augdt
+          INTO CORRESPONDING FIELDS OF TABLE gt_header
+          FROM zc103fit0001
+          WHERE blart = 'DR'
+          AND   budat IN so_budt
+          AND stblg = ''
+          AND bstat = 'A'
+            ORDER BY gjahr belnr.
+          ENDIF.
+        WHEN OTHERS.
+          IF pa_pay = 'X'.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+                   stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+                   erdat erzet ernam aedat aezet aenam augbl augdt
+              INTO CORRESPONDING FIELDS OF TABLE gt_header
+              FROM zc103fit0001
+              WHERE blart = 'KR'
+              AND   budat IN so_budt
+              AND stblg = ''
+              AND bp_id = pv_bpid
+              AND bstat = 'A'
+            ORDER BY gjahr belnr.
+          ELSE.
+            SELECT bp_id bp_name usname bukrs belnr gjahr bldat blart budat waers bktxt mblnr bstat uscode
+               stblg stjah reversal_date attach_id type_id cat_id reversal_bool
+               erdat erzet ernam aedat aezet aenam augbl augdt
+          INTO CORRESPONDING FIELDS OF TABLE gt_header
+          FROM zc103fit0001
+          WHERE blart = 'DR'
+          AND   budat IN so_budt
+          AND stblg = ''
+              AND bp_id = pv_bpid
+              AND bstat = 'A'
+            ORDER BY gjahr belnr.
+          ENDIF.
+      ENDCASE.
+    WHEN OTHERS.
+  ENDCASE.
+
+  " ##### #### ####.
+
+  DELETE gt_header WHERE bstat = 'C' OR bstat = ''.
+
+<font color ="#0000FF">*--# ### #### #####</font>
+  lv_cnt = lines( gt_header ).
+  MESSAGE s008 WITH lv_cnt.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_header</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_header.
+
+<font color ="#0000FF">*-- ##/## ## ### ##.</font>
+  gv_none_cnt = 0.
+  gv_finish_cnt = 0.
+
+  LOOP AT gt_header INTO gs_header.
+    IF gs_header-bstat = 'A'.
+      gs_header-status = icon_led_yellow.
+      gv_none_cnt += 1.
+    ELSEIF gs_header-bstat = 'B'.
+      gs_header-status = icon_led_green.
+      gv_finish_cnt += 1.
+    ENDIF.
+    MODIFY gt_header FROM gs_header INDEX sy-tabix TRANSPORTING status.
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form search_bp</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM search_bp .
+
+  PERFORM get_data USING gv_search_bp.
+  IF gt_header IS INITIAL.
+    MESSAGE '#### #### ####.' TYPE 'S' DISPLAY LIKE 'E'.
+  ELSE.
+    PERFORM set_header.
+    PERFORM remove_item_bank_data.
+    PERFORM refresh_data.
+    gv_search = gv_search_bp.
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form remove_item_bank_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM remove_item_bank_data .
+
+  CLEAR: gt_item, gt_account.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form get_item_bank_data_temp_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM get_item_bank_data USING: pv_gjahr pv_belnr pv_bpcode pv_init.
+
+  IF pa_pay = 'X'.
+    SELECT bukrs belnr gjahr buzei bldat blart budat sgtxt uscode type_id cat_id
+         bschl koart shkzg hkont wrbtr dmbtr waers mwskz hwbas mwsts zuonr augbl
+         augdt obelnr anln1 matnr werks erdat erzet ernam
+         aedat aezet aenam usname
+      INTO CORRESPONDING FIELDS OF TABLE gt_item
+        FROM zc103fit0002
+        WHERE bukrs = '0001'
+        AND   belnr = pv_belnr
+        AND   gjahr = pv_gjahr
+        AND   shkzg = 'S'
+      ORDER BY buzei.
+  ELSE.
+    SELECT bukrs belnr gjahr buzei bldat blart budat sgtxt uscode type_id cat_id
+     bschl koart shkzg hkont wrbtr dmbtr waers mwskz hwbas mwsts zuonr augbl
+     augdt obelnr anln1 matnr werks erdat erzet ernam
+     aedat aezet aenam usname
+      INTO CORRESPONDING FIELDS OF TABLE gt_item
+      FROM zc103fit0002
+      WHERE bukrs = '0001'
+      AND   belnr = pv_belnr
+      AND   gjahr = pv_gjahr
+      AND   shkzg = 'H'
+      ORDER BY buzei.
+  ENDIF.
+
+
+  IF pv_init = abap_false.
+    IF sy-subrc &lt;&gt; 0.
+      MESSAGE '## ### ## #### ####.' TYPE 'I'.
+    ENDIF.
+  ENDIF.
+
+
+  CASE pa_pay.
+    WHEN 'X'. "###### , #### #####.
+
+      SELECT deal_id deal_type bp_id wrbtr waers
+     bank_name bank_date belnr erdat erzet ernam aedat aezet aenam dmbtr
+    INTO CORRESPONDING FIELDS OF TABLE gt_account
+    FROM zc103fit0020
+    WHERE bp_id = pv_bpcode
+      AND belnr = ''
+      AND deal_type = '02'
+    ORDER BY bank_date.
+
+    WHEN OTHERS.
+
+      SELECT deal_id deal_type bp_id wrbtr waers
+      bank_name bank_date belnr erdat erzet ernam aedat aezet aenam dmbtr
+      INTO CORRESPONDING FIELDS OF TABLE gt_account
+      FROM zc103fit0020
+      WHERE bp_id = pv_bpcode
+      AND belnr = ''
+      AND deal_type = '01'
+      ORDER BY bank_date.
+
+  ENDCASE.
+
+  READ TABLE gt_header INTO gs_header WITH KEY gjahr = pv_gjahr belnr = pv_belnr.
+
+  LOOP AT gt_item INTO gs_item.
+    IF gs_header-bstat = 'A'.
+      gs_item-status = icon_led_yellow.
+    ELSE.
+      gs_item-status = icon_led_green.
+    ENDIF.
+    gs_item-k_waers = 'KRW'.
+    MODIFY gt_item FROM gs_item INDEX sy-tabix TRANSPORTING status k_waers.
+  ENDLOOP.
+
+<font color ="#0000FF">*-- ## ## #### append###</font>
+  CLEAR: gt_item_temp, gs_item_temp.
+
+  IF pa_pay = 'X'.
+    SELECT bukrs belnr gjahr buzei bldat blart budat sgtxt uscode type_id cat_id
+         bschl koart shkzg hkont wrbtr dmbtr waers mwskz hwbas mwsts zuonr augbl
+         augdt obelnr anln1 matnr werks erdat erzet ernam usname
+         aedat aezet aenam
+      INTO CORRESPONDING FIELDS OF TABLE gt_item_temp
+        FROM zc103fit0002
+        WHERE obelnr = gv_belnr
+<font color ="#0000FF">*        AND   shkzg = 'H'</font>
+      ORDER BY buzei.
+  ELSE.
+    SELECT bukrs belnr gjahr buzei bldat blart budat sgtxt uscode type_id cat_id
+     bschl koart shkzg hkont wrbtr dmbtr waers mwskz hwbas mwsts zuonr augbl
+     augdt obelnr anln1 matnr werks erdat erzet ernam usname
+     aedat aezet aenam
+      INTO CORRESPONDING FIELDS OF TABLE gt_item_temp
+      FROM zc103fit0002
+      WHERE obelnr = gv_belnr
+<font color ="#0000FF">*      AND   shkzg = 'S'</font>
+      ORDER BY buzei.
+  ENDIF.
+
+  DELETE gt_item_temp WHERE augdt(4) &lt;&gt; pv_gjahr.
+
+  LOOP AT gt_item_temp INTO gs_item_temp.
+    IF pa_pay = 'X'.
+      IF gs_item_temp-hkont = '200001' AND gs_item_temp-shkzg = 'S'.
+        CONTINUE.
+      ENDIF.
+      IF gs_item_temp-shkzg = 'H'.
+        gs_item_temp-dmbtr = gs_item_temp-dmbtr * -1.
+        gs_item_temp-wrbtr = gs_item_temp-wrbtr * -1.
+      ENDIF.
+    ELSE.
+      IF gs_item_temp-hkont = '100004' AND gs_item_temp-shkzg = 'H'.
+        CONTINUE.
+      ENDIF.
+      IF gs_item_temp-shkzg = 'S'.
+        gs_item_temp-dmbtr = gs_item_temp-dmbtr * -1.
+        gs_item_temp-wrbtr = gs_item_temp-wrbtr * -1.
+      ENDIF.
+    ENDIF.
+    gs_item_temp-k_waers = 'KRW'.
+    APPEND gs_item_temp TO gt_item.
+  ENDLOOP.
+
+  LOOP AT gt_account INTO gs_account.
+    gs_account-k_waers = 'KRW'.
+    MODIFY gt_account FROM gs_account INDEX sy-tabix TRANSPORTING k_waers.
+  ENDLOOP.
+
+  PERFORM set_gl_name.
+  PERFORM make_display_item_color .
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clear_search</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clear_search .
+
+  CLEAR gv_search_bp.
+  PERFORM get_data USING : ''.
+  PERFORM set_header.
+  CLEAR: gt_item, gt_account.
+  PERFORM refresh_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clearing_docu</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clearing_docu_krw USING pv_selected_belnr pv_selected_gjahr pv_selected_bpid CHANGING pv_new_belnr pv_subrc.
+
+  DATA: lt_rows             TYPE lvc_t_row,
+        lt_selected_indices TYPE STANDARD TABLE OF sy-tabix,
+        lv_total_selection  TYPE i,
+        lv_index            TYPE sy-tabix,
+        gs_header           TYPE zc103fit0001,
+        ls_item1            TYPE zc103fit0002, "#####
+        ls_item2            TYPE zc103fit0002, "####
+        lv_uscode           TYPE zc103fit0002-uscode,
+        lv_usname           TYPE zc103fit0002-usname,
+        lv_bp_name          TYPE zc103fit0001-bp_name.
+
+  " 1. ### # ####
+  CALL METHOD go_right_btm_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_rows.
+
+  " 2. ### ### ##
+  LOOP AT lt_rows INTO DATA(ls_row).
+    APPEND ls_row-index TO lt_selected_indices.
+  ENDLOOP.
+
+  CLEAR: gs_header, ls_item1,ls_item2, pv_new_belnr.
+
+  call function <a href ="zc103pmfg0005/zc103pmfg0005.html">'ZC103PMFG0005'</a>
+    IMPORTING
+      empno   = lv_uscode
+      empname = lv_usname.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE '#### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  IF lv_uscode IS INITIAL.
+    MESSAGE '#### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  "3. ### #### ### ### ## ## ##.
+  LOOP AT lt_selected_indices INTO lv_index.
+    READ TABLE gt_account INTO DATA(ls_selected_account) INDEX lv_index.
+    IF sy-subrc = 0.
+
+      " #### ##
+      CALL FUNCTION 'NUMBER_GET_NEXT'
+        EXPORTING
+          nr_range_nr             = '01'     " ### ### No
+          object                  = 'ZC103FIZR'
+        IMPORTING
+          number                  = pv_new_belnr
+        EXCEPTIONS
+          interval_not_found      = 1
+          number_range_not_intern = 2
+          object_not_found        = 3
+          quantity_is_0           = 4
+          quantity_is_not_1       = 5
+          interval_overflow       = 6
+          buffer_overflow         = 7
+          OTHERS                  = 8.
+      IF sy-subrc &lt;&gt; 0.
+        MESSAGE TEXT-e08 TYPE 'S' DISPLAY LIKE 'E'.
+        RETURN.
+      ENDIF.
+
+      "1. ## ###
+
+      READ TABLE gt_header INTO DATA(ls_header)
+           WITH KEY belnr = pv_selected_belnr
+                    gjahr = pv_selected_gjahr.
+
+      IF sy-subrc = 0.
+        lv_bp_name = ls_header-bp_name.
+      ENDIF.
+
+      gs_header-bukrs = '0001'.
+      gs_header-belnr = pv_new_belnr.
+      gs_header-gjahr = sy-datum(4).
+      gs_header-bldat = sy-datum.
+      gs_header-blart = 'ZR'.
+      gs_header-budat = ls_selected_account-bank_date.
+      gs_header-waers = 'KRW'.
+      gs_header-bktxt = '##### ######.'.
+<font color ="#0000FF">*-- TODO: ### ### #### ######.</font>
+      gs_header-mblnr = ''.
+      gs_header-bstat = 'B'.
+      gs_header-uscode = lv_uscode.
+      "USNAM#####.
+      gs_header-usname = lv_usname.
+      gs_header-bp_id = ls_selected_account-bp_id.
+      gs_header-bp_name = lv_bp_name.
+      gs_header-augbl = pv_selected_belnr.
+      gs_header-augdt = sy-datum.
+      " #####
+      gs_header-erdat = sy-datum.
+      gs_header-ernam = sy-uname.
+      gs_header-erzet = sy-uzeit.
+      gs_header-aedat = sy-datum.
+      gs_header-aenam = sy-uname.
+      gs_header-aezet = sy-uzeit.
+
+      "2. ### ####.
+      "####
+      ls_item1-k_waers = 'KRW'.
+      ls_item1-bukrs = gs_header-bukrs.
+      ls_item1-belnr = gs_header-belnr.
+      ls_item1-gjahr = gs_header-gjahr.
+      ls_item1-bldat = gs_header-bldat.
+      ls_item1-blart = gs_header-blart.
+      ls_item1-budat = gs_header-budat.
+      ls_item1-uscode = sy-uname.
+      ls_item1-wrbtr = ls_selected_account-wrbtr.
+      ls_item1-dmbtr = ls_selected_account-dmbtr.
+      ls_item1-waers = ls_selected_account-waers.
+      ls_item1-bp_id = ls_selected_account-bp_id.
+      ls_item1-bp_name = lv_bp_name.
+      "#####
+      ls_item1-erdat = sy-datum.
+      ls_item1-ernam = sy-uname.
+      ls_item1-erzet = sy-uzeit.
+      ls_item1-aedat = sy-datum.
+      ls_item1-aenam = sy-uname.
+      ls_item1-aezet = sy-uzeit.
+
+      READ TABLE gt_11 INTO gs_11 WITH KEY ernam = gs_header-uscode.
+      IF sy-subrc = 0.
+        ls_item1-usname = gs_11-empname.
+      ELSE.
+        ls_item1-usname = ''.
+      ENDIF.
+
+      "### #####/#####(item1# ##) +#####, ### ### ## ###### ####
+      ls_item1-obelnr = pv_selected_belnr. "#####
+      ls_item1-augdt = gs_header-augdt.
+      ls_item1-uscode = lv_uscode.
+      ls_item1-usname = lv_usname.
+      ls_item2 = ls_item1.
+      ls_item2-hkont = '100002'.
+      ls_item1-koart = 'S'.
+
+      IF pa_pay = 'X'. "####
+        "item1: #####
+        ls_item1-buzei = 1.
+        ls_item1-sgtxt = '######'.
+        ls_item1-bschl = 21.
+        ls_item1-koart = 'K'.
+        ls_item1-shkzg = 'S'.
+        ls_item1-hkont = '200001'.
+
+
+        "item2: ####
+        ls_item2-buzei = 2.
+        ls_item2-bschl = 50.
+        ls_item2-shkzg = 'H'.
+
+
+      ELSE. "####
+        "item1: #####
+        ls_item1-buzei = 2.
+        ls_item1-sgtxt = '######'.
+        ls_item1-bschl = 11.
+        ls_item1-koart = 'D'.
+        ls_item1-shkzg = 'H'.
+        ls_item1-hkont = '100004'.
+
+        "item2: ####
+        ls_item2-buzei = 1.
+        ls_item2-bschl = 40.
+        ls_item2-shkzg = 'S'.
+
+      ENDIF.
+
+
+      "append###
+      INSERT zc103fit0001 FROM gs_header.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE TEXT-e09 TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        EXIT.
+      ENDIF.
+
+      INSERT zc103fit0002 FROM ls_item1.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE 'Item1 insert failed' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        EXIT.
+      ENDIF.
+
+      INSERT zc103fit0002 FROM ls_item2.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE 'Item2 insert failed' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        EXIT.
+      ENDIF.
+
+      ls_selected_account-belnr = pv_new_belnr.
+      UPDATE zc103fit0020 FROM ls_selected_account.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE '##### ## ### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        EXIT.
+      ENDIF.
+
+      COMMIT WORK.
+
+    ENDIF.
+  ENDLOOP.
+
+  PERFORM get_item_bank_data USING: pv_selected_gjahr pv_selected_belnr pv_selected_bpid abap_false.
+  PERFORM refresh_data.
+  MESSAGE '## ## ##.' TYPE 'S'.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form make_display_item_color</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM make_display_item_color .
+
+  DATA : lv_tabix TYPE sy-tabix,
+         ls_scol  TYPE lvc_s_scol.
+<font color ="#0000FF">*         ls_scol  TYPE LINE OF lvc_t_scol.</font>
+
+  LOOP AT gt_item INTO gs_item.
+
+    lv_tabix = sy-tabix.
+
+    CLEAR : ls_scol, gs_item-color. " Clear the Color manager
+    CASE gs_item-belnr.
+      WHEN gv_belnr.
+<font color ="#0000FF">*  -- Set color</font>
+        ls_scol-color-col = 5.  " Color value
+        ls_scol-nokeycol  = abap_true.
+        INSERT ls_scol INTO TABLE gs_item-color.
+        MODIFY gt_item FROM gs_item INDEX lv_tabix
+                                 TRANSPORTING color.
+    ENDCASE.
+
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_gl_name</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_gl_name .
+
+  SELECT saknr txt50
+    INTO CORRESPONDING FIELDS OF TABLE gt_gl
+    FROM zc103fit0003.
+
+  LOOP AT gt_item INTO gs_item.
+    READ TABLE gt_gl INTO DATA(ls_gl) WITH KEY saknr = gs_item-hkont.
+    IF sy-subrc = 0.
+      gs_item-gl_name = ls_gl-txt50.
+    ENDIF.
+    MODIFY gt_item FROM gs_item.
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form clearing_docu_usd</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&      --&gt; LV_SELECTED_BELNR</font>
+<font color ="#0000FF">*&      --&gt; LV_SELECTED_GJAHR</font>
+<font color ="#0000FF">*&      --&gt; LV_SELECTED_BPID</font>
+<font color ="#0000FF">*&      &lt;-- LV_NEW_BELNR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM clearing_docu_usd  USING pv_selected_belnr pv_selected_gjahr pv_selected_bpid
+                              pv_account_amount pv_deal_amount pv_waers CHANGING pv_new_belnr pv_subrc.
+
+  DATA: lt_rows             TYPE lvc_t_row,
+        lt_selected_indices TYPE STANDARD TABLE OF sy-tabix,
+        lv_total_selection  TYPE i,
+        lv_index            TYPE sy-tabix,
+        ls_item1            TYPE zc103fit0002, "#####
+        ls_item2            TYPE zc103fit0002, "####
+        ls_item3            TYPE zc103fit0002,
+        lv_case             TYPE i,
+        lv_differ           TYPE dmbtr,
+        lv_uscode           TYPE zc103fit0002-uscode,
+        lv_usname           TYPE zc103fit0002-usname,
+        lv_bp_name          TYPE zc103fit0001-bp_name.
+
+  " 1. ### # ####
+  CALL METHOD go_right_btm_alv-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_rows.
+
+  " 2. ### ### ##
+  LOOP AT lt_rows INTO DATA(ls_row).
+    APPEND ls_row-index TO lt_selected_indices.
+  ENDLOOP.
+
+  CLEAR: gs_header, ls_item1,ls_item2, pv_new_belnr, ls_item3.
+
+  call function <a href ="zc103pmfg0005/zc103pmfg0005.html">'ZC103PMFG0005'</a>
+    IMPORTING
+      empno   = lv_uscode
+      empname = lv_usname.
+
+  IF sy-subrc &lt;&gt; 0.
+    MESSAGE '#### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  IF lv_uscode IS INITIAL.
+    MESSAGE '#### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+    RETURN.
+  ENDIF.
+
+  "3. ### #### ### ### ## ## ##.
+  LOOP AT lt_selected_indices INTO lv_index.
+    READ TABLE gt_account INTO DATA(ls_selected_account) INDEX lv_index.
+    IF sy-subrc = 0.
+
+      " #### ##
+      CALL FUNCTION 'NUMBER_GET_NEXT'
+        EXPORTING
+          nr_range_nr             = '01'     " ### ### No
+          object                  = 'ZC103FIZR'
+        IMPORTING
+          number                  = pv_new_belnr
+        EXCEPTIONS
+          interval_not_found      = 1
+          number_range_not_intern = 2
+          object_not_found        = 3
+          quantity_is_0           = 4
+          quantity_is_not_1       = 5
+          interval_overflow       = 6
+          buffer_overflow         = 7
+          OTHERS                  = 8.
+      IF sy-subrc &lt;&gt; 0.
+        MESSAGE TEXT-e08 TYPE 'S' DISPLAY LIKE 'E'.
+        RETURN.
+      ENDIF.
+
+      "1. ## ###
+
+      READ TABLE gt_header INTO DATA(ls_header)
+           WITH KEY belnr = pv_selected_belnr
+                    gjahr = pv_selected_gjahr.
+
+      IF sy-subrc = 0.
+        lv_bp_name = ls_header-bp_name.
+      ENDIF.
+
+      gs_header-bukrs = '0001'.
+      gs_header-belnr = pv_new_belnr.
+      gs_header-gjahr = sy-datum(4).
+      gs_header-bldat = sy-datum.
+      gs_header-blart = 'ZR'.
+      gs_header-budat = ls_selected_account-bank_date.
+      gs_header-waers = 'KRW'.
+      gs_header-bktxt = '##### ######.'.
+<font color ="#0000FF">*-- TODO: ### ### #### ######.</font>
+      gs_header-mblnr = ''.
+      gs_header-bstat = 'B'.
+      gs_header-bp_id = ls_selected_account-bp_id.
+      gs_header-bp_name = lv_bp_name.
+      gs_header-augbl = pv_selected_belnr.
+      gs_header-augdt = sy-datum.
+      " #####
+      gs_header-erdat = sy-datum.
+      gs_header-ernam = sy-uname.
+      gs_header-erzet = sy-uzeit.
+      gs_header-aedat = sy-datum.
+      gs_header-aenam = sy-uname.
+      gs_header-aezet = sy-uzeit.
+      gs_header-uscode = lv_uscode.
+      gs_header-usname = lv_usname.
+      "2. ### ####.
+      "####
+      ls_item1-k_waers = 'KRW'.
+      ls_item1-bukrs = gs_header-bukrs.
+      ls_item1-belnr = gs_header-belnr.
+      ls_item1-gjahr = gs_header-gjahr.
+      ls_item1-bldat = gs_header-bldat.
+      ls_item1-blart = gs_header-blart.
+      ls_item1-budat = gs_header-budat.
+      ls_item1-uscode = sy-uname.
+      ls_item1-wrbtr = ls_selected_account-wrbtr. "KRW##! (USD# ## #######)
+      ls_item1-waers = ls_selected_account-waers.
+      ls_item1-dmbtr = pv_deal_amount.
+      ls_item1-uscode = lv_uscode.
+      ls_item1-usname = lv_usname.
+      ls_item1-bp_id = ls_selected_account-bp_id.
+      ls_item1-bp_name = lv_bp_name.
+      "#####
+      ls_item1-erdat = sy-datum.
+      ls_item1-ernam = sy-uname.
+      ls_item1-erzet = sy-uzeit.
+      ls_item1-aedat = sy-datum.
+      ls_item1-aenam = sy-uname.
+      ls_item1-aezet = sy-uzeit.
+
+      READ TABLE gt_11 INTO gs_11 WITH KEY ernam = gs_header-uscode.
+      IF sy-subrc = 0.
+        ls_item1-usname = gs_11-empname.
+      ELSE.
+        ls_item1-usname = ''.
+      ENDIF.
+
+      "### #####/#####(item1# ##) +#####, ### ### ## ###### ####
+      ls_item1-obelnr = pv_selected_belnr. "#####
+      ls_item1-augdt = gs_header-augdt.
+
+      ls_item2 = ls_item1.
+      ls_item3 = ls_item1. "####, ####
+      ls_item2-hkont = '100002'.
+      ls_item1-koart = 'S'.
+
+      "8. ## #### ## ### #### ## #########, ### ##### ### ### ##### ### ###.
+      " ### ### ## ### ### ### ####/###### ##.
+      IF pa_pay = 'X'.
+        IF pv_account_amount &gt; pv_deal_amount. "## ## # ###
+          lv_case = 1.
+          "#### ## "CASE 1: # ## ####
+          "( #####, #### / #### )
+
+          lv_differ = pv_account_amount - pv_deal_amount.
+
+          ls_item1-buzei = 1.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 21.
+          ls_item1-koart = 'K'.
+          ls_item1-shkzg = 'S'.
+          ls_item1-hkont = '200001'.
+
+
+          "item2: ####
+          ls_item2-dmbtr = pv_account_amount.
+          ls_item2-buzei = 2.
+          ls_item2-bschl = 50.
+          ls_item2-koart = 'S'.
+          ls_item2-shkzg = 'H'.
+
+          ls_item3-dmbtr = lv_differ.
+          ls_item3-buzei = 3.
+          ls_item3-bschl = 50.
+          ls_item3-koart = 'S'.
+          ls_item3-shkzg = 'S'.
+          ls_item3-hkont = '500004'.
+          ls_item3-wrbtr = 0.
+
+        ELSEIF pv_account_amount &lt; pv_deal_amount. "#### ###
+          lv_case = 2.
+          "#### ## "CASE 1: # ## ####
+          "( ##### / ####, #### )
+
+          lv_differ = pv_deal_amount - pv_account_amount.
+
+          ls_item1-buzei = 1.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 21.
+          ls_item1-koart = 'K'.
+          ls_item1-shkzg = 'S'.
+          ls_item1-hkont = '200001'.
+
+
+          "item2: ####
+          ls_item2-dmbtr = pv_account_amount.
+          ls_item2-buzei = 2.
+          ls_item2-bschl = 50.
+          ls_item2-koart = 'S'.
+          ls_item2-shkzg = 'H'.
+
+          ls_item3-dmbtr = lv_differ.
+          ls_item3-buzei = 3.
+          ls_item3-bschl = 40.
+          ls_item3-koart = 'S'.
+          ls_item3-shkzg = 'H'.
+          ls_item3-hkont = '400004'.
+          ls_item3-wrbtr = 0.
+
+
+
+
+        ELSE. "#### ###
+          "#### ## "CASE 1
+          "( ##### / #### )
+          "item1: #####
+          lv_case = 3.
+
+          ls_item1-buzei = 1.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 21.
+          ls_item1-koart = 'K'.
+          ls_item1-shkzg = 'S'.
+          ls_item1-hkont = '200001'.
+
+
+          "item2: ####
+          ls_item2-buzei = 2.
+          ls_item2-bschl = 50.
+          ls_item2-shkzg = 'H'.
+        ENDIF.
+      ELSE.
+        IF pv_account_amount &gt; pv_deal_amount. "## ## # ###
+          "##### ## CASE 2: # ## #####
+          "(#### / #####, ####)
+          lv_case = 4.
+
+          lv_differ = pv_account_amount - pv_deal_amount.
+
+          ls_item1-buzei = 1.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 11.
+          ls_item1-koart = 'D'.
+          ls_item1-shkzg = 'H'.
+          ls_item1-hkont = '100004'.
+
+
+          "item2: ####
+          ls_item2-dmbtr = pv_account_amount.
+          ls_item2-buzei = 2.
+          ls_item2-bschl = 40.
+          ls_item2-koart = 'S'.
+          ls_item2-shkzg = 'S'.
+
+          ls_item3-dmbtr = lv_differ.
+          ls_item3-buzei = 3.
+          ls_item3-bschl = 50.
+          ls_item3-koart = 'S'.
+          ls_item3-shkzg = 'H'.
+          ls_item3-hkont = '400004'.
+          ls_item3-wrbtr = 0.
+
+        ELSEIF pv_account_amount &lt; pv_deal_amount. "#### ###
+          "##### ## CASE 2: # ## #####
+          "(####, ####  / #####)
+          lv_case = 5.
+
+          lv_differ = pv_deal_amount - pv_account_amount.
+
+          ls_item1-buzei = 1.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 11.
+          ls_item1-koart = 'D'.
+          ls_item1-shkzg = 'H'.
+          ls_item1-hkont = '100004'.
+
+
+          "item2: ####
+          ls_item2-dmbtr = pv_account_amount.
+          ls_item2-buzei = 2.
+          ls_item2-bschl = 40.
+          ls_item2-koart = 'S'.
+          ls_item2-shkzg = 'S'.
+
+          ls_item3-dmbtr = lv_differ.
+          ls_item3-buzei = 3.
+          ls_item3-bschl = 50.
+          ls_item3-koart = 'S'.
+          ls_item3-shkzg = 'S'.
+          ls_item3-hkont = '500004'.
+          ls_item3-wrbtr = 0.
+
+        ELSE. "#### ###
+          lv_case = 6.
+          "##### ## CASE 2
+          "(####  / #####)
+          "item1: #####
+          lv_case = 6.
+          ls_item1-buzei = 2.
+          ls_item1-sgtxt = '######'.
+          ls_item1-bschl = 11.
+          ls_item1-koart = 'D'.
+          ls_item1-shkzg = 'H'.
+          ls_item1-hkont = '100004'.
+
+          "item2: ####
+          ls_item2-buzei = 1.
+          ls_item2-bschl = 40.
+          ls_item2-shkzg = 'S'.
+        ENDIF.
+      ENDIF.
+
+      "append###
+      INSERT zc103fit0001 FROM gs_header.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE TEXT-e09 TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        RETURN.
+      ENDIF.
+
+      INSERT zc103fit0002 FROM ls_item1.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE 'Item1 insert failed' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        RETURN.
+      ENDIF.
+
+      INSERT zc103fit0002 FROM ls_item2.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE 'Item2 insert failed' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        RETURN.
+      ENDIF.
+
+      IF lv_case &lt;&gt; 3 AND lv_case &lt;&gt; 6.
+        INSERT zc103fit0002 FROM ls_item3.
+        IF sy-subrc &lt;&gt; 0.
+          ROLLBACK WORK.
+          MESSAGE 'Item2 insert failed' TYPE 'S' DISPLAY LIKE 'E'.
+          pv_subrc = 4.
+          RETURN.
+        ENDIF.
+      ENDIF.
+
+      ls_selected_account-belnr = pv_new_belnr.
+      UPDATE zc103fit0020 FROM ls_selected_account.
+      IF sy-subrc &lt;&gt; 0.
+        ROLLBACK WORK.
+        MESSAGE '##### ## ### ######.' TYPE 'S' DISPLAY LIKE 'E'.
+        pv_subrc = 4.
+        RETURN.
+      ENDIF.
+
+
+    ENDIF.
+  ENDLOOP.
+
+  MESSAGE '## ## ##.' TYPE 'S'.
+
+  PERFORM get_data USING : ''.
+  PERFORM set_header.
+  PERFORM get_item_bank_data USING: pv_selected_gjahr pv_selected_belnr pv_selected_bpid abap_false.
+  PERFORM refresh_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form toggle_check</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM toggle_check .
+
+  PERFORM get_data USING gv_search.
+  PERFORM set_header.
+  PERFORM remove_item_bank_data.
+  PERFORM refresh_data.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form layout_title</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM layout_title .
+
+  gs_layout1-grid_title = '####'.
+  gs_layout2-grid_title = '#####'.
+  IF pa_pay = 'X'.
+    gs_layout3-grid_title = '######'.
+  ELSE.
+    gs_layout3-grid_title = '######'.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form set_emp_data</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM set_emp_data .
+
+  SELECT empname ernam
+    INTO CORRESPONDING FIELDS OF TABLE gt_11
+    FROM zc103fit0011.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 758
+</font>
+</body>
+</html>
